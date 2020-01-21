@@ -1,23 +1,25 @@
 FROM php:7.2
 
 RUN set -x \
- && apt-get update -y \
+ && apt-get update && apt-get install -y gnupg2 -y \
  && apt-get install -y wget apt-transport-https \
  && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
  && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list \
  && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
- && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
+ && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
  && apt-get update -y \
  && apt-get install -y git zip libmcrypt-dev libcurl4-gnutls-dev libicu-dev \
                        libfreetype6-dev libjpeg-dev libpng-dev libxml2-dev \
-                       libbz2-dev libc-client-dev libkrb5-dev  mysql-client \ 
+                       libbz2-dev libc-client-dev libkrb5-dev  mariadb-client \ 
                        nodejs yarn google-chrome-stable \
  && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/  \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
- && docker-php-ext-install mbstring mcrypt curl json intl gd xml zip bz2 opcache pdo_mysql pcntl imap exif bcmath \
+ && pecl install mcrypt-1.0.2 \
+ && docker-php-ext-enable mcrypt \
+ && docker-php-ext-install mbstring curl json intl gd xml zip bz2 opcache pdo_mysql pcntl imap exif bcmath \
  && pecl install xdebug \
- && echo "date.timezone = Europe/Berlin" > /usr/local/etc/php/conf.d/timezone.ini \
+ && echo "date.timezone = America/Sao_Paulo" > /usr/local/etc/php/conf.d/timezone.ini \
  && echo "memory_limit = -1" > /usr/local/etc/php/conf.d/memory.ini  \
  && wget -O /usr/local/bin/composer https://getcomposer.org/download/1.7.2/composer.phar \
  && chmod +x /usr/local/bin/composer \
